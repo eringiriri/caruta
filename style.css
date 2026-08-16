@@ -188,6 +188,12 @@ h1 {
     background: #24293C;
     border: 1px solid #465490;
     transform: rotateY(180deg);
+    color: #30ECCA;
+}
+
+.card-back svg {
+    width: 28px;
+    height: 28px;
 }
 
 .card.matched .card-back {
@@ -207,4 +213,15 @@ h1 {
 
 .result-message.fail {
     color: #EC3030;
+}
+
+.credit {
+    margin-top: 24px;
+    font-size: 11px;
+    color: #565c85;
+    line-height: 1.6;
+}
+
+.credit a {
+    color: #8b91b8;
 }
