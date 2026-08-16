@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caruta</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page">
+    <h1>Caruta</h1>
+    <p class="sub">6×4のペア当てミニゲーム練習サイトです。同じ絵柄のカードを2枚めくって揃えてください。制限時間は60秒。</p>
+
+    <div class="layout">
+        <section class="panel settings">
+            <h2>設定</h2>
+            <div class="rule-text">グリッド: 6×4(12ペア)<br>制限時間: 60秒</div>
+
+            <button class="new-btn" id="startBtn">開始する</button>
+
+            <div class="stats">
+                <div><span>残り時間</span><b id="statTime">60.0</b></div>
+                <div><span>試行</span><b id="statAttempts">0</b></div>
+                <div><span>ペア</span><b id="statPairs">0 / 12</b></div>
+                <div><span>クリア回数</span><b id="statClears">0</b></div>
+            </div>
+        </section>
+
+        <section class="panel game-area">
+            <div class="board-wrap">
+                <div class="timer-bar" id="timerBarWrap">
+                    <div class="timer-bar-inner" id="timerBar"></div>
+                </div>
+                <div class="board" id="board"></div>
+                <div class="result-message" id="resultMessage"></div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
