@@ -34,7 +34,18 @@ const statPairs = el('statPairs');
 const statClears = el('statClears');
 
 const STATS_KEY = 'carutaStats';
-const stats = JSON.parse(localStorage.getItem(STATS_KEY) || '{"clears":0}');
+
+function loadStats() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(STATS_KEY));
+        const clears = raw && typeof raw === 'object' ? raw.clears : 0;
+        return { clears: Number.isFinite(clears) && clears >= 0 ? clears : 0 };
+    } catch {
+        return { clears: 0 };
+    }
+}
+
+const stats = loadStats();
 
 let cards = [];
 let firstIndex = null;
@@ -43,7 +54,9 @@ let active = false;
 let attempts = 0;
 let matchedPairs = 0;
 let timeRemaining = TIME_LIMIT_MS;
+let deadline = 0;
 let timerInterval = null;
+let mismatchTimer = null;
 
 function shuffle(array) {
     const a = array.slice();
@@ -63,7 +76,11 @@ function renderStats() {
 
 function saveClear() {
     stats.clears++;
-    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    try {
+        localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    } catch {
+        // storage unavailable/full - continue with in-memory stats only
+    }
 }
 
 function buildCards() {
@@ -75,7 +92,8 @@ function buildCards() {
 function renderBoard() {
     board.innerHTML = '';
     cards.forEach((card, index) => {
-        const cardEl = document.createElement('div');
+        const cardEl = document.createElement('button');
+        cardEl.type = 'button';
         cardEl.className = 'card' + (card.revealed || card.matched ? ' revealed' : '') + (card.matched ? ' matched' : '');
         cardEl.innerHTML = `
             <div class="card-inner">
@@ -90,6 +108,10 @@ function renderBoard() {
 
 function onCardClick(index) {
     if (!active || !canClick) return;
+    if (performance.now() >= deadline) {
+        endGame(false);
+        return;
+    }
     const card = cards[index];
     if (card.revealed || card.matched) return;
 
@@ -120,7 +142,9 @@ function onCardClick(index) {
             endGame(true);
         }
     } else {
-        setTimeout(() => {
+        clearTimeout(mismatchTimer);
+        mismatchTimer = setTimeout(() => {
+            mismatchTimer = null;
             first.revealed = false;
             second.revealed = false;
             firstIndex = null;
@@ -131,9 +155,8 @@ function onCardClick(index) {
 }
 
 function tick() {
-    timeRemaining -= 100;
+    timeRemaining = Math.max(0, deadline - performance.now());
     if (timeRemaining <= 0) {
-        timeRemaining = 0;
         renderStats();
         updateTimerBar();
         endGame(false);
@@ -165,6 +188,9 @@ function endGame(success) {
 }
 
 function startGame() {
+    clearTimeout(mismatchTimer);
+    mismatchTimer = null;
+
     startBtn.disabled = true;
     resultMessage.textContent = '';
     resultMessage.className = 'result-message';
@@ -176,6 +202,7 @@ function startGame() {
     attempts = 0;
     matchedPairs = 0;
     timeRemaining = TIME_LIMIT_MS;
+    deadline = performance.now() + TIME_LIMIT_MS;
 
     renderStats();
     updateTimerBar();
